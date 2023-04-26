@@ -36,13 +36,13 @@ const userController = {
           .populate('thoughts')
           .then((dbUserData) => {
             if (!dbUserData) {
-              return res.status(404).json({ message: 'User does not exist' });
+              return res.status(404).json({ message: 'User with this ID does not exist.' });
             }
             res.json(dbUserData);
           })
           .catch((err) => {
             res.status(500).json(err);
-          });
+        });
       },
 
     // UPDATE A USER
