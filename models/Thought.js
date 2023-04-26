@@ -1,73 +1,38 @@
 const { Schema, model } = require('mongoose');
+const moment = require('moment');
+const reactionSchema = require('./Reaction');
 
-// CREATING REACTION SCHEMA ( SUBDOCUMENT SCHEMA TO THOUGHT SCHEMA )
-const reactionSchema = new Schema(
-    {
-      reactionId: {
-        type: Schema.Types.ObjectId,
-        default: () => new Types.ObjectId(), 
-      },
-  
-      reactionBody: {
-        type: String,
-        required: true,
-        maxlength: 280,
-      },
-  
-      username: {
-        type: String,
-        required: true,
-      },
-  
-      createdAt: {
-        type: Date,
-        default: Date.now,
-      },
+const thoughtSchema = new Schema(
+  {
+    thoughtText: {
+      type: String,
+      required: 'A thought is required',
+      minlength: 1,
+      maxlength: 280,
     },
-    {
-      toJSON: {
-        getters: true,
-      },
-      id: false,
-    }
-  );
-
-  // SCHEMA TO CREATE THOUGHT MODEL
- const thoughtSchema = new Schema(
-    {
-      thoughtText: {
-        type: String,
-        required: true,
-        max_length: 280, 
-        minlength: 1,
-      },
-      createdAt: {
-         type: Date,
-         default: Date.now,
+    createdAt: {
+      type: Date,
+      default: Date.now,
+      get: (timestamp) => moment(timestamp).format('MMM Do, YYYY [at] hh:mm a'),
     },
-      username: { 
-        type: String,
-        required: true,
-      },
-        reactions: [reactionSchema],
+    username: {
+      type: String,
+      required: true,
     },
-    {
-      toJSON: {
-        virtuals: true,
-        getters: true,
-      },
-      id: false,
-    }
-  );
+    reactions: [reactionSchema],
+  },
+  {
+    toJSON: {
+      getters: true,
+    },
+    id: false,
+  }
+);
 
+thoughtSchema.virtual('reactionCount').get(function () {
+  return this.reactions.length;
+});
 
-  // VIRTUAL THAT RETRIEVES LENGTH OF THOUGHTS REACTIONS ARRAY FIELD ON QUERY
-  thoughtSchema
-    .virtual("reactionCount")
-    .get(function () {
-        return this.reactions.length;
-    });
+const Thought = model('Thought', thoughtSchema);
 
-    const Thought = model('Thought', thoughtSchema);
-
-    module.exports = Thought;
+module.exports = Thought;
